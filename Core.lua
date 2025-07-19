@@ -1,4 +1,5 @@
 ﻿local _, ns = ...
+local GetSpellInfo = _G.GetSpellInfo or (C_Spell and C_Spell.GetSpellInfo)
 
 FastFilgerDB = FastFilgerDB or {}
 local class = select(2, UnitClass("player"))
