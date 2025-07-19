@@ -214,6 +214,50 @@ function Filger:DisplayActives()
             end
             bar.spellID = 0
             self.bars[index] = bar
+
+        -- existing bar but missing elements if group mode changed
+        elseif self.Mode == "BAR" and not bar.spellname then
+            local barHeight = floor(self.IconSize * 0.33)
+            bar.statusbar = CreateFrame("StatusBar", "$parentStatusBar", bar)
+            bar.statusbar:SetWidth(self.BarWidth * Misc.mult)
+            bar.statusbar:SetHeight(barHeight * Misc.mult)
+            if self.IconSide == "LEFT" then
+                bar.statusbar:SetPoint("BOTTOMLEFT", bar, "BOTTOMRIGHT", 3 * Misc.mult, 3 * Misc.mult)
+            elseif self.IconSide == "RIGHT" then
+                bar.statusbar:SetPoint("BOTTOMRIGHT", bar, "BOTTOMLEFT", -3 * Misc.mult, 3 * Misc.mult)
+            end
+            bar.statusbar:SetMinMaxValues(0, 1)
+            bar.statusbar:SetValue(0)
+
+            bar.bg = CreateFrame("Frame", "$parentBG", bar.statusbar, BackdropTemplateMixin and "BackdropTemplate")
+            bar.bg:SetPoint("TOPLEFT", -3 * Misc.mult, 3 * Misc.mult)
+            bar.bg:SetPoint("BOTTOMRIGHT", 3 * Misc.mult, -3 * Misc.mult)
+            bar.bg:SetFrameStrata("BACKGROUND")
+
+            bar.background = bar.statusbar:CreateTexture(nil, "BACKGROUND")
+            bar.background:SetAllPoints()
+            bar.background:SetVertexColor(0, 0, 0, .4)
+
+            bar.time = bar.statusbar:CreateFontString("$parentTime", "OVERLAY")
+            bar.time:SetFont(Misc.font, Misc.barNumSize, "OUTLINE")
+            bar.time:SetShadowOffset(1 * Misc.mult, -1 * Misc.mult)
+            bar.time:SetPoint("BOTTOMRIGHT", bar.statusbar, 0, barHeight-1)
+            bar.time:SetJustifyH("RIGHT")
+
+            bar.count = bar:CreateFontString("$parentCount", "OVERLAY")
+            bar.count:SetFont(Misc.font, Misc.barNumSize, "THINOUTLINE")
+            bar.count:SetShadowOffset(1 * Misc.mult, -1 * Misc.mult)
+            bar.count:SetPoint("BOTTOMRIGHT", 1, 1)
+            bar.count:SetJustifyH("CENTER")
+
+            bar.spellname = bar.statusbar:CreateFontString("$parentSpellName", "OVERLAY")
+            bar.spellname:SetFont(GameTooltipText:GetFont(), Misc.barNameSize, "OUTLINE")
+            bar.spellname:SetShadowOffset(1 * Misc.mult, -1 * Misc.mult)
+            bar.spellname:SetPoint("BOTTOMLEFT", bar.statusbar, 0, barHeight-1)
+            bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
+            bar.spellname:SetJustifyH("LEFT")
+
+            bar.spellID = 0
         end
         
         Filger.SetTemplate(self, bar)
@@ -236,8 +280,8 @@ function Filger:DisplayActives()
     for activeIndex, value in pairs(temp) do
         local bar = self.bars[index]
         bar.spellName = GetSpellInfo(value.spid)
-        if self.Mode == "BAR" then
-            bar.spellname:SetText(bar.spellName)
+        if self.Mode == "BAR" and bar.spellname then
+            bar.spellname:SetText(bar.spellName or "")
         end
         bar.icon:SetTexture(value.icon)
         if value.count and value.count > 1 then
