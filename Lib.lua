@@ -290,7 +290,7 @@ function Filger:DisplayActives()
                 bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
                 bar.spellname:SetJustifyH("LEFT")
             end
-            if bar.spellname and bar.spellname.SetText then
+            if bar.spellname and type(bar.spellname.SetText) == "function" then
                 bar.spellname:SetText(bar.spellName or "")
             end
         end
