@@ -290,8 +290,8 @@ function Filger:DisplayActives()
                 bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
                 bar.spellname:SetJustifyH("LEFT")
             end
-            if bar.spellname and bar.spellname.SetText then
-                bar.spellname:SetText(bar.spellName or "")
+            if bar.spellname and type(bar.spellname.SetText) == "function" and bar.spellname.GetObjectType and bar.spellname:GetObjectType() == "FontString" then
+                bar.spellname:SetText(tostring(bar.spellName or ""))
             end
         end
         bar.icon:SetTexture(value.icon)
