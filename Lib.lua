@@ -201,14 +201,14 @@ function Filger:DisplayActives()
                     bar.count:SetJustifyH("CENTER")
                 end
 
-                if bar.spellname then
-                    bar.spellname = _G[bar.spellname:GetName()]
-                else
-                    bar.spellname = bar.statusbar:CreateFontString("$parentSpellName", "OVERLAY")
-                    bar.spellname:SetFont(GameTooltipText:GetFont(), Misc.barNameSize, "OUTLINE")
-                    bar.spellname:SetShadowOffset(1 * Misc.mult, -1 * Misc.mult)
-                    bar.spellname:SetPoint("BOTTOMLEFT", bar.statusbar, 0, barHeight-1)
-                    bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
+            if bar.spellname and bar.spellname.GetObjectType and bar.spellname:GetObjectType() == "FontString" then
+                bar.spellname = _G[bar.spellname:GetName()]
+            else
+                bar.spellname = bar.statusbar:CreateFontString("$parentSpellName", "OVERLAY")
+                bar.spellname:SetFont(GameTooltipText:GetFont(), Misc.barNameSize, "OUTLINE")
+                bar.spellname:SetShadowOffset(1 * Misc.mult, -1 * Misc.mult)
+                bar.spellname:SetPoint("BOTTOMLEFT", bar.statusbar, 0, barHeight-1)
+                bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
                     bar.spellname:SetJustifyH("LEFT")
                 end
             end
@@ -216,7 +216,7 @@ function Filger:DisplayActives()
             self.bars[index] = bar
 
         -- existing bar but missing elements if group mode changed
-        elseif self.Mode == "BAR" and not bar.spellname then
+        elseif self.Mode == "BAR" and (not bar.spellname or not bar.spellname.GetObjectType or bar.spellname:GetObjectType() ~= "FontString") then
             local barHeight = floor(self.IconSize * 0.33)
             bar.statusbar = CreateFrame("StatusBar", "$parentStatusBar", bar)
             bar.statusbar:SetWidth(self.BarWidth * Misc.mult)
@@ -281,7 +281,7 @@ function Filger:DisplayActives()
         local bar = self.bars[index]
         bar.spellName = GetSpellInfo(value.spid)
         if self.Mode == "BAR" then
-            if not bar.spellname or type(bar.spellname.SetText) ~= "function" then
+            if not bar.spellname or not bar.spellname.GetObjectType or bar.spellname:GetObjectType() ~= "FontString" then
                 local barHeight = floor(self.IconSize * 0.33)
                 bar.spellname = bar.statusbar:CreateFontString("$parentSpellName", "OVERLAY")
                 bar.spellname:SetFont(GameTooltipText:GetFont(), Misc.barNameSize, "OUTLINE")
@@ -290,7 +290,7 @@ function Filger:DisplayActives()
                 bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
                 bar.spellname:SetJustifyH("LEFT")
             end
-            if bar.spellname and type(bar.spellname.SetText) == "function" then
+            if bar.spellname and bar.spellname.SetText then
                 bar.spellname:SetText(bar.spellName or "")
             end
         end
