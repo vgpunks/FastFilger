@@ -162,7 +162,7 @@ function Init()
         for i = 1, #SpellGroups, 1 do
             local data = SpellGroups[i].data
 
-            local movebar = CreateFrame("Frame", "FFilgerFrame"..i.."_"..data.Name.."Movebar", UIParent)
+            local movebar = CreateFrame("Frame", "FFilgerFrame"..i.."_"..data.Name.."Movebar", UIParent, BackdropTemplateMixin and "BackdropTemplate")
             movebar:Hide()
             movebar:SetFrameLevel(10)
             movebar:EnableMouse(true)
@@ -277,7 +277,9 @@ SLASH_FastFilgerTest1 = "/ff"
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:SetScript("OnEvent", function()
-    SpellActivationOverlayFrame:SetFrameStrata("BACKGROUND")
+    if SpellActivationOverlayFrame then
+        SpellActivationOverlayFrame:SetFrameStrata("BACKGROUND")
+    end
     Init() 
     f:UnregisterEvent("PLAYER_ENTERING_WORLD") 
 end)

@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 110000
 ## Title: FastFilger
 ## Notes: Faster
 ## Author: WINDDPAN
