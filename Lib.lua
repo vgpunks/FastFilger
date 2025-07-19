@@ -91,7 +91,7 @@ function Filger:DisplayActives()
     for _, b in pairs(self.actives) do
         local bar = self.bars[index]
         if not bar then
-            bar = CreateFrame("Frame", "FilgerAnchor"..id.."Frame"..index, self)
+            bar = CreateFrame("Frame", "FilgerAnchor"..id.."Frame"..index, self, BackdropTemplateMixin and "BackdropTemplate")
             bar:SetScale(1)
             bar:SetFrameStrata("Medium")
 
@@ -166,7 +166,7 @@ function Filger:DisplayActives()
                 if bar.bg then
                     bar.bg = _G[bar.bg:GetName()]
                 else
-                    bar.bg = CreateFrame("Frame", "$parentBG", bar.statusbar)
+                    bar.bg = CreateFrame("Frame", "$parentBG", bar.statusbar, BackdropTemplateMixin and "BackdropTemplate")
                     bar.bg:SetPoint("TOPLEFT", -3 * Misc.mult, 3 * Misc.mult)
                     bar.bg:SetPoint("BOTTOMRIGHT", 3 * Misc.mult, -3 * Misc.mult)
                     bar.bg:SetFrameStrata("BACKGROUND")
