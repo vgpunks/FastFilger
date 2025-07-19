@@ -280,7 +280,16 @@ function Filger:DisplayActives()
     for activeIndex, value in pairs(temp) do
         local bar = self.bars[index]
         bar.spellName = GetSpellInfo(value.spid)
-        if self.Mode == "BAR" and bar.spellname then
+        if self.Mode == "BAR" then
+            if not bar.spellname then
+                local barHeight = floor(self.IconSize * 0.33)
+                bar.spellname = bar.statusbar:CreateFontString("$parentSpellName", "OVERLAY")
+                bar.spellname:SetFont(GameTooltipText:GetFont(), Misc.barNameSize, "OUTLINE")
+                bar.spellname:SetShadowOffset(1 * Misc.mult, -1 * Misc.mult)
+                bar.spellname:SetPoint("BOTTOMLEFT", bar.statusbar, 0, barHeight-1)
+                bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
+                bar.spellname:SetJustifyH("LEFT")
+            end
             bar.spellname:SetText(bar.spellName or "")
         end
         bar.icon:SetTexture(value.icon)
