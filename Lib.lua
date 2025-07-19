@@ -281,7 +281,7 @@ function Filger:DisplayActives()
         local bar = self.bars[index]
         bar.spellName = GetSpellInfo(value.spid)
         if self.Mode == "BAR" then
-            if not bar.spellname then
+            if not bar.spellname or type(bar.spellname.SetText) ~= "function" then
                 local barHeight = floor(self.IconSize * 0.33)
                 bar.spellname = bar.statusbar:CreateFontString("$parentSpellName", "OVERLAY")
                 bar.spellname:SetFont(GameTooltipText:GetFont(), Misc.barNameSize, "OUTLINE")
@@ -290,7 +290,9 @@ function Filger:DisplayActives()
                 bar.spellname:SetPoint("RIGHT", bar.time, "LEFT")
                 bar.spellname:SetJustifyH("LEFT")
             end
-            bar.spellname:SetText(bar.spellName or "")
+            if bar.spellname and bar.spellname.SetText then
+                bar.spellname:SetText(bar.spellName or "")
+            end
         end
         bar.icon:SetTexture(value.icon)
         if value.count and value.count > 1 then
