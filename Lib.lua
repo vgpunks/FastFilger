@@ -22,6 +22,23 @@ local function GetSpellCooldownWrapper(spell)
         end
     end
 end
+
+-- Wrapper to maintain compatibility with the removal of the global
+-- UnitAura function in Dragonflight. When the global is unavailable we
+-- fall back to the table-based C_UnitAuras API and unpack the fields the
+-- addon expects.
+local function UnitAuraWrapper(unit, index, filter)
+    if _G.UnitAura then
+        return _G.UnitAura(unit, index, filter)
+    elseif C_UnitAuras and C_UnitAuras.GetAuraDataByIndex then
+        local aura = C_UnitAuras.GetAuraDataByIndex(unit, index, filter)
+        if aura then
+            return aura.name, aura.icon, aura.applications, aura.dispelName,
+                   aura.duration, aura.expirationTime, aura.sourceUnit,
+                   aura.isStealable, aura.nameplateShowPersonal, aura.spellId
+        end
+    end
+end
 local Filger = {}
 local Filger_Spells = Filger_Spells or {}
 local MyUnits = {player = true, vehicle = true, pet = true}
@@ -70,7 +87,7 @@ end
 function Filger:UnitAura(unitID, inSpellID, spell, filter, absID)
     if absID then
         for i = 1, 40 do
-            local name, icon, count, _, duration, expirationTime, unitCaster, _, _, spellID = UnitAura(unitID, i, filter)
+            local name, icon, count, _, duration, expirationTime, unitCaster, _, _, spellID = UnitAuraWrapper(unitID, i, filter)
             if not name then break end
             if spellID == inSpellID then
                 return name, icon, count, _, duration, expirationTime, unitCaster, _, _, spellID
