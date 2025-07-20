@@ -1,6 +1,27 @@
-﻿local addon, ns = ...
-local GetSpellInfo = _G.GetSpellInfo or (C_Spell and C_Spell.GetSpellInfo)
-local GetSpellCooldown = _G.GetSpellCooldown or (C_Spell and C_Spell.GetSpellCooldown)
+local addon, ns = ...
+-- Provide compatibility with both the old global spell APIs and the newer
+-- table-returning C_Spell versions introduced in Dragonflight.
+local function GetSpellInfoWrapper(spellID)
+    if _G.GetSpellInfo then
+        return _G.GetSpellInfo(spellID)
+    elseif C_Spell and C_Spell.GetSpellInfo then
+        local info = C_Spell.GetSpellInfo(spellID)
+        if info then
+            return info.name, nil, info.iconID
+        end
+    end
+end
+
+local function GetSpellCooldownWrapper(spell)
+    if _G.GetSpellCooldown then
+        return _G.GetSpellCooldown(spell)
+    elseif C_Spell and C_Spell.GetSpellCooldown then
+        local data = C_Spell.GetSpellCooldown(spell)
+        if data then
+            return data.startTime, data.duration
+        end
+    end
+end
 local Filger = {}
 local Filger_Spells = Filger_Spells or {}
 local MyUnits = {player = true, vehicle = true, pet = true}
@@ -280,7 +301,7 @@ function Filger:DisplayActives()
     index = 1
     for activeIndex, value in pairs(temp) do
         local bar = self.bars[index]
-        bar.spellName = GetSpellInfo(value.spid)
+        bar.spellName = GetSpellInfoWrapper(value.spid)
         if self.Mode == "BAR" then
             if not bar.spellname or not bar.spellname.GetObjectType or bar.spellname:GetObjectType() ~= "FontString" then
                 local barHeight = floor(self.IconSize * 0.33)
@@ -359,7 +380,7 @@ function Filger:ResetGroup(spells)
 
         if data.filter == "BUFF" then
             local caster, spn, expirationTime
-            spn, _, _ = GetSpellInfo(data.spellID)
+            spn, _, _ = GetSpellInfoWrapper(data.spellID)
             if spn then
                 name, icon, count, _, duration, expirationTime, caster, _, _, spid = Filger:UnitAura(data.unitID, data.spellID, spn, "HELPFUL", data.absID)
                 if name and (data.caster ~= 1 and (caster == data.caster or data.caster == "all") or MyUnits[caster]) then
@@ -369,7 +390,7 @@ function Filger:ResetGroup(spells)
             end
         elseif data.filter == "DEBUFF" then
             local caster, spn, expirationTime
-            spn, _, _ = GetSpellInfo(data.spellID)
+            spn, _, _ = GetSpellInfoWrapper(data.spellID)
             if spn then
                 name, icon, count, _, duration, expirationTime, caster, _, _, spid = Filger:UnitAura(data.unitID, data.spellID, spn, "HARMFUL", data.absID)
                 if name and (data.caster ~= 1 and (caster == data.caster or data.caster == "all") or MyUnits[caster]) then
@@ -379,12 +400,12 @@ function Filger:ResetGroup(spells)
             end
         elseif data.filter == "CD" then
             if data.spellID then
-                name, _, icon = GetSpellInfo(data.spellID)
+                name, _, icon = GetSpellInfoWrapper(data.spellID)
                 if name then
                     if data.absID then
-                        start, duration = GetSpellCooldown(data.spellID)
+                        start, duration = GetSpellCooldownWrapper(data.spellID)
                     else
-                        start, duration = GetSpellCooldown(name)
+                        start, duration = GetSpellCooldownWrapper(name)
                     end
                     spid = data.spellID
                 end
