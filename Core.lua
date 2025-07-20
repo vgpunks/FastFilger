@@ -1,6 +1,30 @@
-﻿local _, ns = ...
-local GetSpellInfo = _G.GetSpellInfo or (C_Spell and C_Spell.GetSpellInfo)
-local GetSpellCooldown = _G.GetSpellCooldown or (C_Spell and C_Spell.GetSpellCooldown)
+local _, ns = ...
+-- Wrapper helpers for spell API compatibility. In Dragonflight the global
+-- functions were removed in favour of table-based C_Spell APIs. These wrappers
+-- mimic the old return values that the addon expects.
+local function GetSpellInfoWrapper(spellID)
+    if _G.GetSpellInfo then
+        return _G.GetSpellInfo(spellID)
+    end
+    if C_Spell and C_Spell.GetSpellInfo then
+        local info = C_Spell.GetSpellInfo(spellID)
+        if info then
+            return info.name, nil, info.iconID
+        end
+    end
+end
+
+local function GetSpellCooldownWrapper(spell)
+    if _G.GetSpellCooldown then
+        return _G.GetSpellCooldown(spell)
+    end
+    if C_Spell and C_Spell.GetSpellCooldown then
+        local info = C_Spell.GetSpellCooldown(spell)
+        if info then
+            return info.startTime, info.duration
+        end
+    end
+end
 
 FastFilgerDB = FastFilgerDB or {}
 local class = select(2, UnitClass("player"))
@@ -21,12 +45,12 @@ function Filger:OnEvent(event, unit)
             if data.filter == "CD" then
                 local name, icon, count, duration, expirationTime, start, spid
                 if data.spellID then
-                    name, _, icon = GetSpellInfo(data.spellID)
+                    name, _, icon = GetSpellInfoWrapper(data.spellID)
                     if name then
                         if data.absID then
-                            start, duration = GetSpellCooldown(data.spellID)
+                            start, duration = GetSpellCooldownWrapper(data.spellID)
                         else
-                            start, duration = GetSpellCooldown(name)
+                            start, duration = GetSpellCooldownWrapper(name)
                         end
                         spid = data.spellID
                     end
@@ -133,7 +157,7 @@ function Init()
                 local spn
                 local id
                 if data[j].spellID then
-                    spn = GetSpellInfo(data[j].spellID)
+                    spn = GetSpellInfoWrapper(data[j].spellID)
                 else
                     local slotLink = GetInventoryItemLink("player", data[j].slotID)
                     if slotLink then
@@ -239,7 +263,7 @@ SlashCmdList["FastFilgerTest"] = function(msg)
                 for id, data in pairs(SpellGroups[i].spells) do
                     local name, icon
                     if data.spellID then
-                        name, _, icon = GetSpellInfo(data.spellID)
+                        name, _, icon = GetSpellInfoWrapper(data.spellID)
                     elseif data.slotID then
                         local slotLink = GetInventoryItemLink("player", data.slotID)
                         if slotLink then
